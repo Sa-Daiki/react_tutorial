@@ -14,7 +14,6 @@ export const Game = (): JSX.Element => {
 
   const handleClick = (i: number): void => {
     const _history = history.slice(0, stepNum + 1);
-    console.log(_history);
     const current = _history[_history.length - 1];
     const squares = current.squares.slice();
     if (calculateWinner(squares) || squares[i]) return;
