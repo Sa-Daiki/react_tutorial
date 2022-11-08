@@ -1,17 +1,7 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
+import { Square } from "./component/Square";
 import "./index.css";
-
-type SquareProps = {
-  onClick: () => void;
-  value: string;
-};
-
-const Square = ({ onClick, value }: SquareProps) => (
-  <button className="square" onClick={onClick}>
-    {value}
-  </button>
-);
 
 type BoardProps = {
   squares: string[];
