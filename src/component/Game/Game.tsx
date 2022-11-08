@@ -1,46 +1,88 @@
-import { useState } from "react";
+import { useReducer } from "react";
 import { Board } from "src/component/Board";
 import { calculateWinner } from "./calculateWinner";
 import Step from "./Step";
 
-export const Game = (): JSX.Element => {
-  const [history, setHistory] = useState([
+type GameStateType = {
+  history: { squares: null[] }[];
+  stepNum: number;
+  xIsNext: boolean;
+};
+
+const gameState: GameStateType = {
+  history: [
     {
       squares: Array(9).fill(null),
     },
-  ]);
-  const [stepNum, setStepNum] = useState(0);
-  const [xIsNext, setXIsNext] = useState(true);
+  ],
+  stepNum: 0,
+  xIsNext: true,
+};
+
+const gameReducer = (state: any, action: any) => {
+  console.log();
+  switch (action.type) {
+    case "CLICK_BOARD":
+      return {
+        ...state,
+        history: state.history.concat([
+          {
+            squares: action.payload.squares,
+          },
+        ]),
+        xIsNext: !state.xIsNext,
+      };
+    case "JUMP_TO":
+      return {
+        ...state,
+        stepNum: action.payload.stepNum,
+        xIsNext: action.payload.stepNum % 2 === 0,
+      };
+    default:
+      throw new Error("unreachable");
+  }
+};
+
+const clickBoard = (payload: any) => {
+  console.log(payload);
+  return {
+    type: "CLICK_BOARD",
+    payload,
+  };
+};
+
+const jumpToBoard = (payload: any) => {
+  console.log(payload);
+  return {
+    type: "JUMP_TO",
+    payload,
+  };
+};
+
+export const Game = (): JSX.Element => {
+  const [state, dispatch] = useReducer(gameReducer, gameState);
 
   const handleClick = (i: number): void => {
-    const _history = history.slice(0, stepNum + 1);
+    const _history = state.history.slice(0, state.stepNum + 1);
     const current = _history[_history.length - 1];
     const squares = current.squares.slice();
     if (calculateWinner(squares) || squares[i]) return;
-    squares[i] = xIsNext ? "X" : "O";
-    setHistory((prev) =>
-      prev.concat([
-        {
-          squares,
-        },
-      ])
-    );
-    setStepNum(history.length);
-    setXIsNext((prev) => !prev);
+    squares[i] = state.xIsNext ? "X" : "O";
+    dispatch(clickBoard({ squares }));
   };
 
-  const jumpTo = (step: number): void => {
-    setStepNum(step);
-    setXIsNext(step % 2 === 0);
-  };
+  // const jumpTo = (step: number): void => {
+  // setStepNum(step);
+  // setXIsNext(step % 2 === 0);
+  // };
 
   let status: string;
-  const current = history[stepNum];
+  const current = state.history[state.stepNum];
   const winner = calculateWinner(current.squares);
   if (winner) {
     status = "Winner: " + winner;
   } else {
-    status = "Next player: " + (xIsNext ? "X" : "O");
+    status = "Next player: " + (state.IsNext ? "X" : "O");
   }
 
   return (
@@ -50,9 +92,16 @@ export const Game = (): JSX.Element => {
       </div>
       <div className="game-info">
         <div>{status}</div>
-        {history.map((_, move) => {
+        {state.history.map((_: any, move: number) => {
           const desc = move ? "Go to move #" + move : "Go to game start";
-          return <Step move={move} jumpTo={jumpTo} desc={desc} key={move} />;
+          return (
+            <Step
+              move={move}
+              jumpTo={(step) => dispatch(jumpToBoard({ stepNum: step }))}
+              desc={desc}
+              key={move}
+            />
+          );
         })}
       </div>
     </div>
