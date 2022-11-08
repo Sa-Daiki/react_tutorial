@@ -13,8 +13,12 @@ const Square = ({ onClick, value }: SquareProps) => (
   </button>
 );
 
-class Board extends React.Component {
-  renderSquare(i) {
+type BoardProps = {
+  squares: number[];
+  onClick: (param: number) => void;
+};
+class Board extends React.Component<BoardProps> {
+  renderSquare(i: number) {
     return (
       <Square
         value={this.props.squares[i]}
