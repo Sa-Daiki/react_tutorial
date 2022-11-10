@@ -1,4 +1,4 @@
 export type SquareProps = {
   onClick: () => void;
-  value: string;
+  value: "X" | "O" | null;
 };

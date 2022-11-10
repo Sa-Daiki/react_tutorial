@@ -1,4 +1,4 @@
 export type BoardProps = {
-  squares: string[];
+  squares: Array<"X" | "O" | null>;
   onClick: (param: number) => void;
 };
