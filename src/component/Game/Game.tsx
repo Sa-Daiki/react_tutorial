@@ -1,63 +1,8 @@
 import { useReducer } from "react";
 import { Board } from "src/component/Board";
 import { calculateWinner } from "./calculateWinner";
+import { clickBoard, gameReducer, gameState, jumpTo } from "./gameReducer";
 import Step from "./Step";
-
-type GameStateType = {
-  history: { squares: null[] }[];
-  stepNum: number;
-  xIsNext: boolean;
-};
-
-const gameState: GameStateType = {
-  history: [
-    {
-      squares: Array(9).fill(null),
-    },
-  ],
-  stepNum: 0,
-  xIsNext: true,
-};
-
-const gameReducer = (state: any, action: any) => {
-  console.log();
-  switch (action.type) {
-    case "CLICK_BOARD":
-      return {
-        ...state,
-        history: state.history.concat([
-          {
-            squares: action.payload.squares,
-          },
-        ]),
-        xIsNext: !state.xIsNext,
-      };
-    case "JUMP_TO":
-      return {
-        ...state,
-        stepNum: action.payload.stepNum,
-        xIsNext: action.payload.stepNum % 2 === 0,
-      };
-    default:
-      throw new Error("unreachable");
-  }
-};
-
-const clickBoard = (payload: any) => {
-  console.log(payload);
-  return {
-    type: "CLICK_BOARD",
-    payload,
-  };
-};
-
-const jumpToBoard = (payload: any) => {
-  console.log(payload);
-  return {
-    type: "JUMP_TO",
-    payload,
-  };
-};
 
 export const Game = (): JSX.Element => {
   const [state, dispatch] = useReducer(gameReducer, gameState);
@@ -68,13 +13,8 @@ export const Game = (): JSX.Element => {
     const squares = current.squares.slice();
     if (calculateWinner(squares) || squares[i]) return;
     squares[i] = state.xIsNext ? "X" : "O";
-    dispatch(clickBoard({ squares }));
+    dispatch(clickBoard({ ...state, history: [{ squares: squares }] }));
   };
-
-  // const jumpTo = (step: number): void => {
-  // setStepNum(step);
-  // setXIsNext(step % 2 === 0);
-  // };
 
   let status: string;
   const current = state.history[state.stepNum];
@@ -82,7 +22,7 @@ export const Game = (): JSX.Element => {
   if (winner) {
     status = "Winner: " + winner;
   } else {
-    status = "Next player: " + (state.IsNext ? "X" : "O");
+    status = "Next player: " + (state.xIsNext ? "X" : "O");
   }
 
   return (
@@ -97,7 +37,7 @@ export const Game = (): JSX.Element => {
           return (
             <Step
               move={move}
-              jumpTo={(step) => dispatch(jumpToBoard({ stepNum: step }))}
+              jumpTo={(step) => dispatch(jumpTo({ ...state, stepNum: step }))}
               desc={desc}
               key={move}
             />
